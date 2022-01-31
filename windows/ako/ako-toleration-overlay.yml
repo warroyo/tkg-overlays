@@ -1,0 +1,11 @@
+#@ load("@ytt:overlay", "overlay")
+#@overlay/match by=overlay.subset({"kind": "StatefulSet", "metadata": {"namespace": "avi-system"}})
+---
+spec:
+    template:
+        spec:
+          #@overlay/match missing_ok=True
+          tolerations:
+          - key: "node-role.kubernetes.io/master"
+            operator: "Exists"
+            effect: "NoSchedule"

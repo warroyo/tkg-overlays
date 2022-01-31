@@ -18,9 +18,12 @@ spec:
       files:
       #@overlay/append
         - path: c:\k\rootca.pem
-          content: #@ base64.decode(data.values.CUSTOM_CA)
+          content: #@ base64.decode(data.values.ROOT_CERT)
+        - path: c:\k\addcert.ps1
+          content: |
+            Import-Certificate -FilePath "c:\k\rootca.pem" -CertStoreLocation cert:\LocalMachine\Root
       #@overlay/match missing_ok=True
       preKubeadmCommands:
         #@overlay/append
-        - 'Import-Certificate -FilePath "c:\k\rootca.pem" -CertStoreLocation cert:\LocalMachine\Root'
+        - powershell c:/k/addcert.ps1 -ExecutionPolicy Bypass
 #@ end

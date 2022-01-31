@@ -1,4 +1,4 @@
 #@data/values
 #@overlay/match-child-defaults missing_ok=True
 ---
-CUSTOM_CA:
+ROOT_CERT:
