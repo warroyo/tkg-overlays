@@ -1,0 +1,2 @@
+#Add this to the cluster config you are using and replace the content with base64 encoded root ca
+CUSTOM_CA: <base64encodedrootcert>

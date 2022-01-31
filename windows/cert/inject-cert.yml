@@ -1,0 +1,26 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+#@ load("@ytt:base64", "base64")
+#@ if data.values.INFRASTRUCTURE_PROVIDER == "windows-vsphere":
+#@overlay/match by=overlay.subset({"kind":"VSphereCluster"}), expects="1+"
+#! add vsphere server to fix issues in 1.4.1
+---
+spec:
+  #@overlay/replace
+  server: #@ data.values.VSPHERE_SERVER
+
+#@overlay/match by=overlay.subset({"kind":"KubeadmConfigTemplate"}), expects="1+"
+---
+spec:
+  template:
+    spec:
+      #@overlay/match missing_ok=True
+      files:
+      #@overlay/append
+        - path: c:\k\rootca.pem
+          content: #@ base64.decode(data.values.CUSTOM_CA)
+      #@overlay/match missing_ok=True
+      preKubeadmCommands:
+        #@overlay/append
+        - 'Import-Certificate -FilePath "c:\k\rootca.pem" -CertStoreLocation cert:\LocalMachine\Root'
+#@ end
