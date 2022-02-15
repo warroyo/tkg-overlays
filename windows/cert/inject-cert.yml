@@ -1,13 +1,8 @@
 #@ load("@ytt:overlay", "overlay")
 #@ load("@ytt:data", "data")
 #@ load("@ytt:base64", "base64")
-#@ if data.values.INFRASTRUCTURE_PROVIDER == "windows-vsphere":
+#@ if data.values.IS_WINDOWS_WORKLOAD_CLUSTER == "true":
 #@overlay/match by=overlay.subset({"kind":"VSphereCluster"}), expects="1+"
-#! add vsphere server to fix issues in 1.4.1
----
-spec:
-  #@overlay/replace
-  server: #@ data.values.VSPHERE_SERVER
 
 #@overlay/match by=overlay.subset({"kind":"KubeadmConfigTemplate"}), expects="1+"
 ---
