@@ -2,7 +2,6 @@
 #@ load("@ytt:data", "data")
 #@ load("@ytt:base64", "base64")
 #@ if data.values.IS_WINDOWS_WORKLOAD_CLUSTER == "true":
-#@overlay/match by=overlay.subset({"kind":"VSphereCluster"}), expects="1+"
 
 #@overlay/match by=overlay.subset({"kind":"KubeadmConfigTemplate"}), expects="1+"
 ---
