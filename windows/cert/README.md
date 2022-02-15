@@ -4,6 +4,8 @@ this overlay adds a root CA to the windows nodes in a windows cluster. it also a
 
 ## Usage
 
+if you are using tkg `1.4.1` make sure you use the 1.4.1 tag
+
 Copy the `inject-cert.yml` and the `inject-cert-values.yml` into the `~/.config/tanzu/tkg/providers/ytt/03_customizations` folder on your workstation
 
 Copy the content from `cluster_config.yml` into your config for the cluster you are building. update the value to have the base64 encoded content of your CA cert.
