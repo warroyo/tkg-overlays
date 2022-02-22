@@ -9,6 +9,14 @@ spec:
     joinConfiguration:
       nodeRegistration:
         #@overlay/match missing_ok=True
-        taints: []
+        taints:
+        - effect: PreferNoSchedule
+          key: node-role.kubernetes.io/master
+    initConfiguration:
+      nodeRegistration:
+        #@overlay/match missing_ok=True
+        taints:
+        - effect: PreferNoSchedule
+          key: node-role.kubernetes.io/master
 
 #@ end
