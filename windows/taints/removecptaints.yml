@@ -1,6 +1,6 @@
 #@ load("@ytt:overlay", "overlay")
 #@ load("@ytt:data", "data")
-#@ if data.values.IS_WINDOWS_WORKLOAD_CLUSTER:
+#@ if data.values.IS_WINDOWS_WORKLOAD_CLUSTER and data.values.REMOVE_CP_TAINT:
 
 #@overlay/match by=overlay.subset({"kind":"KubeadmControlPlane"}), expects="1+"
 ---
