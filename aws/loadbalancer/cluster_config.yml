@@ -1,0 +1,2 @@
+#Add this to the cluster config 
+LB_SUBNETS: subnet-xxx,subnet-xxx

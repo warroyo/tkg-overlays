@@ -1,0 +1,18 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+
+#@overlay/match by=overlay.subset({"kind":"AWSCluster"})
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: AWSCluster
+spec:
+#@overlay/match missing_ok=True
+  controlPlaneLoadBalancer:
+#@ if data.values.LB_SUBNETS != None:
+  #@ subnets = data.values.LB_SUBNETS.split(",")
+  #@overlay/match missing_ok=True
+      subnets:
+      #@ for i in range(len(subnets)) :
+        - #@ subnets[i]
+      #@ end
+#@ end
