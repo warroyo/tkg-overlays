@@ -1,0 +1,21 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+
+
+#@ if data.values.CLUSTER_PLAN == "ha1az":
+#@overlay/match by=overlay.subset({"kind":"KubeadmControlPlane"})
+---
+apiVersion: controlplane.cluster.x-k8s.io/v1beta1
+kind: KubeadmControlPlane
+spec:
+  replicas: 3
+
+
+#@overlay/match by=overlay.subset({"kind":"MachineDeployment"})
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachineDeployment
+spec:
+  replicas: 3
+
+#@ end

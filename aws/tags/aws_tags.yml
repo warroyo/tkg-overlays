@@ -1,0 +1,38 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+
+#@overlay/match by=overlay.subset({"kind":"AWSCluster"})
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: AWSCluster
+spec:
+#@overlay/match missing_ok=True
+#@ if data.values.TAGS != None:
+  #@ tags = data.values.TAGS.split(",")
+  #@overlay/match missing_ok=True
+  #@yaml/text-templated-strings
+  additionalTags:
+  #@ for i in range(len(tags)) :
+  #@ tag = tags[i].split("=")
+    (@= tag[0] @): #@ tag[1]
+  #@ end
+#@ end
+
+#@overlay/match by=overlay.subset({"kind":"AWSMachineTemplate"}),expects="1+"
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: AWSMachineTemplate
+spec:
+  template:
+    spec:
+    #@overlay/match missing_ok=True
+    #@ if data.values.TAGS != None:
+      #@ tags = data.values.TAGS.split(",")
+      #@overlay/match missing_ok=True
+      #@yaml/text-templated-strings
+      additionalTags:
+      #@ for i in range(len(tags)) :
+        #@ tag = tags[i].split("=")
+        (@= tag[0] @): #@ tag[1]
+      #@ end
+    #@ end
