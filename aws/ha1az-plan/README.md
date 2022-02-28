@@ -5,7 +5,7 @@ this is a plan that allows for deploying an HA cluster into 1az in aws. this wil
 
 # Usage 
 
-copy the `cluster-template-definition-ha1az.yml` into `~/.tanzu/tkg/providers/infrastructure-aws/<version>/cluster-template-definition-ha1az.yaml` 
+copy the `cluster-template-definition-ha1az.yml` into `~/.config/tanzu/tkg/providers/infrastructure-aws/<version>/cluster-template-definition-ha1az.yaml` 
 
 copy `ha1az.yml` into `~/.config/tanzu/tkg/providers/ytt/03_customizations` 
 
