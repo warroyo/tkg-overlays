@@ -2,4 +2,4 @@
 
 #@overlay/match-child-defaults missing_ok=True
 ---
-LB_SUBNETS:
+LB_SUBNETS: ""
