@@ -1,0 +1,2 @@
+#Add this to the cluster config you are using and replace the content with log level
+KUBEADM_LOG_LEVEL: "<number 1-10>"

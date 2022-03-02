@@ -1,0 +1,21 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+#@ if data.values.KUBEADM_LOG_LEVEL != "":
+
+#@overlay/match by=overlay.subset({"kind":"KubeadmControlPlane"}), expects="1+"
+---
+spec:
+  kubeadmConfigSpec:
+    #@overlay/match missing_ok=True
+    verbosity: #@ data.values.KUBEADM_LOG_LEVEL
+
+
+#@overlay/match by=overlay.subset({"kind":"KubeadmConfigTemplate"}), expects="1+"
+---
+spec:
+  template:
+    spec:
+      #@overlay/match missing_ok=True
+      verbosity: #@ data.values.KUBEADM_LOG_LEVEL
+
+#@ end
