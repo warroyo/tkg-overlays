@@ -1,0 +1,14 @@
+#@ load("@ytt:overlay", "overlay")
+
+#@overlay/match by=overlay.and_op(overlay.subset({"kind": "Ingress"}), overlay.subset({"metadata": {"name": "harbor-ingress"}}))
+
+
+---
+metadata:
+  annotations:
+    #@overlay/match missing_ok=True
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    #@overlay/match missing_ok=True
+    ingress.kubernetes.io/force-ssl-redirect: "true"
+    #@overlay/match missing_ok=True
+    kubernetes.io/tls-acme: "true"
