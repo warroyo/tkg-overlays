@@ -16,7 +16,7 @@ This overlay will add the correct annotations to the Harbor ingress to allow for
 
 ## Update Harbor package values
 
-There are only two values that need to change specifically for this overlay. The below values should be added to the harbor values file. We need to use `harbor-tls` as the secret name since this is the default secret name and currently(3/10/2022) there is a bug in the package that will cause the harbor core container to fail. If you absolutely need to change this see [this overlay](). We are also setting `tlsCertificateSecretName` in order to prevent harbor form generating default certs. We then disable contour's HTTPProxy since it does not support the cert manager annotations. 
+There are only two values that need to change specifically for this overlay. The below values should be added to the harbor values file. We need to use `harbor-tls` as the secret name since this is the default secret name and currently(3/10/2022) there is a bug in the package that will cause the harbor core container to fail. If you absolutely need to change this see [this overlay](../custom-cert). We are also setting `tlsCertificateSecretName` in order to prevent harbor form generating default certs. We then disable contour's HTTPProxy since it does not support the cert manager annotations. 
 
 `tlsCertificateSecretName: harbor-tls`
 `enableContourHttpProxy: false`
