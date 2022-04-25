@@ -1,0 +1,39 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+
+#@ if data.values.PTRACE :
+
+
+#@overlay/match by=overlay.subset({"kind":"KubeadmControlPlane"}), expects="1+"
+---
+spec:
+  kubeadmConfigSpec:
+  #@overlay/match missing_ok=True
+    files:
+    #@overlay/append
+      - path: /etc/sysctl.d/10-ptrace.conf
+        content: |
+          kernel.yama.ptrace_scope = 0
+    #@overlay/match missing_ok=True
+    preKubeadmCommands:
+      #@overlay/append
+      - systemctl restart systemd-sysctl.service
+
+
+#@overlay/match by=overlay.subset({"kind":"KubeadmConfigTemplate"}), expects="1+"
+---
+spec:
+  template:
+    spec:
+      #@overlay/match missing_ok=True
+      files:
+      #@overlay/append
+        - path: /etc/sysctl.d/10-ptrace.conf
+          content: |
+            kernel.yama.ptrace_scope = 0
+      #@overlay/match missing_ok=True
+      preKubeadmCommands:
+        #@overlay/append
+        - systemctl restart systemd-sysctl.service
+
+#@ end
