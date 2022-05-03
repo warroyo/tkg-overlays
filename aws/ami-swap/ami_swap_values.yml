@@ -1,0 +1,5 @@
+#@data/values
+
+#@overlay/match-child-defaults missing_ok=True
+---
+AMI_ID: ami-01aa011638bc73cd7

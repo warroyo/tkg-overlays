@@ -1,0 +1,11 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+
+#@overlay/match by=overlay.subset({"kind":"AWSMachineTemplate"}),expects="1+"
+---
+spec:
+  template:
+    spec:
+      ami:
+        #@overlay/replace
+        id: #@ data.values.AMI_ID

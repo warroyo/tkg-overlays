@@ -1,0 +1,2 @@
+#Add this to the cluster config 
+AMI_ID: <ami-id>
