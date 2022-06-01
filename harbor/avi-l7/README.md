@@ -16,12 +16,26 @@ For this overlay there is only 1 value to update. We need to set `enableContourH
 tanzu package install harbor --package-name harbor.tanzu.vmware.com --version 2.3.3+vmware.1-tkg.1 --values-file harbor-data-values.yaml -n default
 ```
 
+## Create an HTTPRule for Avi 
+
+This is needed to tell avi that the backend pools are listening on tls and to re-encrypt traffic.
+
+1. Create a new application ssl profile in avi since a default one does not exist. `Templates -> Security -> SSL/TLS Profile` make sure to choose "Application Profile"
+
+2. Apply the HTTPRule and update the value for the harbor hostname.
+
+```
+ytt -v HARBOR_HOST=<your-harbor-hostname> -f httprule.yml | kubectl apply -f-
+```
+
+
+
 ## Add the overlay to the package
 
 First we create a secret in the same namespace as the harbor package since in the above example we created it in `default` thats where the secret goes
 
 ```
-kubectl -n default create secret generic portal-overlay -o yaml --dry-run=client --from-file=portal-nodeport-overlay.yml | kubectl apply -f -
+kubectl -n default create secret generic avi-l7-overlay -o yaml --dry-run=client --from-file=avi-l7-overlay.yml | kubectl apply -f -
 ```
 
 Now we need to annotate the package to add the overlay

@@ -1,0 +1,36 @@
+#@ load("@ytt:data", "data")
+
+---
+apiVersion: ako.vmware.com/v1alpha1
+kind: HTTPRule
+metadata:
+   name: harbor
+   namespace: tanzu-system-registry
+spec:
+  #@overlay/match missing_ok=True
+  fqdn:  #@ data.values.HARBOR_HOST
+  paths:
+  - target: /
+    tls:
+      type: reencrypt 
+      sslProfile: avi-ssl-profile
+  - target: /api/
+    tls: 
+      type: reencrypt 
+      sslProfile: avi-ssl-profile
+  - target: /service/
+    tls: 
+      type: reencrypt 
+      sslProfile: avi-ssl-profile
+  - target: /v2
+    tls: 
+      type: reencrypt 
+      sslProfile: avi-ssl-profile
+  - target: /chartrepo/
+    tls: 
+      type: reencrypt 
+      sslProfile: avi-ssl-profile
+  - target: /c/
+    tls: 
+      type: reencrypt 
+      sslProfile: avi-ssl-profile
