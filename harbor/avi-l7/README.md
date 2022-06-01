@@ -20,7 +20,7 @@ tanzu package install harbor --package-name harbor.tanzu.vmware.com --version 2.
 
 This is needed to tell avi that the backend pools are listening on tls and to re-encrypt traffic.
 
-1. Create a new application ssl profile in avi since a default one does not exist. `Templates -> Security -> SSL/TLS Profile` make sure to choose "Application Profile"
+1. Create a new application ssl profile in avi since a default one does not exist. `Templates -> Security -> SSL/TLS Profile` make sure to choose "Application Profile" . Name the new profile `avi-ssl-profile`
 
 2. Apply the HTTPRule and update the value for the harbor hostname.
 
