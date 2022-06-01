@@ -1,0 +1,19 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+
+#@overlay/match by=overlay.and_op(overlay.subset({"kind": "Service"}), overlay.subset({"metadata": {"name": "harbor-portal"}}))
+---
+spec:
+  #@overlay/match missing_ok=True
+  type: NodePort
+
+  ports:
+  #@overlay/match by="port"
+  - port: 443
+    #@overlay/match missing_ok=True
+    name: https
+    #@overlay/match missing_ok=True
+    protocol: TCP
+
+
+    
