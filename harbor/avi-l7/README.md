@@ -1,6 +1,6 @@
 # Switch the Harbor portal to NodePort
 
-This overlay will switch the Harbor portal from using clusterIP to NodePort so that it will work with NSX ALB L7 ingress using NodePort mode. 
+This overlay will switch the Harbor from using clusterIP to NodePort so that it will work with NSX ALB L7 ingress using NodePort mode. 
 
 
 # Usage
