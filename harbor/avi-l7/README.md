@@ -1,4 +1,4 @@
-# Switch the Harbor portal to NodePort
+# Update Harbor to work with AKO in L7 NodePort mode
 
 This overlay will switch the Harbor from using clusterIP to NodePort so that it will work with NSX ALB L7 ingress using NodePort mode. 
 
