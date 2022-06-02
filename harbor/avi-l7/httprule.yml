@@ -13,24 +13,24 @@ spec:
   - target: /
     tls:
       type: reencrypt 
-      sslProfile: avi-ssl-profile
+      sslProfile: System-Standard
   - target: /api/
     tls: 
       type: reencrypt 
-      sslProfile: avi-ssl-profile
+      sslProfile: System-Standard
   - target: /service/
     tls: 
       type: reencrypt 
-      sslProfile: avi-ssl-profile
+      sslProfile: System-Standard
   - target: /v2
     tls: 
       type: reencrypt 
-      sslProfile: avi-ssl-profile
+      sslProfile: System-Standard
   - target: /chartrepo/
     tls: 
       type: reencrypt 
-      sslProfile: avi-ssl-profile
+      sslProfile: System-Standard
   - target: /c/
     tls: 
       type: reencrypt 
-      sslProfile: avi-ssl-profile
+      sslProfile: System-Standard
