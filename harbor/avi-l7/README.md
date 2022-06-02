@@ -39,7 +39,7 @@ kubectl -n default create secret generic avi-l7-overlay -o yaml --dry-run=client
 Now we need to annotate the package to add the overlay
 
 ```
-kubectl -n default annotate packageinstalls harbor ext.packaging.carvel.dev/ytt-paths-from-secret-name.0=portal-overlay
+kubectl -n default annotate packageinstalls harbor ext.packaging.carvel.dev/ytt-paths-from-secret-name.0=avi-l7-overlay
 ```
 
 
