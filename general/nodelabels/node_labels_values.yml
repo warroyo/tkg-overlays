@@ -1,0 +1,6 @@
+#@data/values
+#@overlay/match-child-defaults missing_ok=True
+---
+
+WORKER_NODE_LABELS: ""
+CP_NODE_LABELS: ""

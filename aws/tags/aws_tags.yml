@@ -7,7 +7,7 @@ apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: AWSCluster
 spec:
 #@overlay/match missing_ok=True
-#@ if data.values.TAGS != None:
+#@ if data.values.TAGS != "":
   #@ tags = data.values.TAGS.split(",")
   #@overlay/match missing_ok=True
   #@yaml/text-templated-strings
@@ -26,7 +26,7 @@ spec:
   template:
     spec:
     #@overlay/match missing_ok=True
-    #@ if data.values.TAGS != None:
+    #@ if data.values.TAGS != "":
       #@ tags = data.values.TAGS.split(",")
       #@overlay/match missing_ok=True
       #@yaml/text-templated-strings
