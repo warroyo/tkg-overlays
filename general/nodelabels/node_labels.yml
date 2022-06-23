@@ -29,6 +29,6 @@ spec:
         nodeRegistration:
           kubeletExtraArgs:
             #@overlay/match missing_ok=True
-            #@ if data.values.CP_NODE_LABELS != "":
-            node-labels: #@ data.values.CP_NODE_LABELS
+            #@ if data.values.WORKER_NODE_LABELS != "":
+            node-labels: #@ data.values.WORKER_NODE_LABELS
             #@ end
