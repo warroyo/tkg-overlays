@@ -1,0 +1,76 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+#@ load("@ytt:yaml", "yaml")
+
+
+#@ def merge_labels(pool):
+#@   predefined_labels = {"node-pool": "{}-{}".format(data.values.CLUSTER_NAME,pool.name)}
+#@   labels = {}
+#@   if hasattr(pool, "labels"):
+#@     labels.update(pool.labels)
+#@   end
+#@   labels.update(predefined_labels)
+#@   return labels
+#@ end
+
+#@ if data.values.EXTRA_NODE_POOLS:
+
+#@ for i in data.values.extrapools:
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachineDeployment
+metadata:
+  name: #@  "{}-{}".format(data.values.CLUSTER_NAME,i.name)
+spec:
+  clusterName: #@ data.values.CLUSTER_NAME
+  replicas: #@ i.replicas
+  selector:
+    matchLabels: null
+  template:
+    metadata:
+      labels: #@ merge_labels(i)
+    spec:
+      clusterName: #@ data.values.CLUSTER_NAME
+      version: #@ data.values.KUBERNETES_VERSION
+      bootstrap:
+        configRef:
+          name: #@ "{}-{}".format(data.values.CLUSTER_NAME,i.name)
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+          kind: KubeadmConfigTemplate
+      infrastructureRef:
+        name: #@ "{}-{}".format(data.values.CLUSTER_NAME,i.name)
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: AWSMachineTemplate
+      failureDomain: #@ i.az
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: AWSMachineTemplate
+metadata:
+  name: #@ "{}-{}".format(data.values.CLUSTER_NAME,i.name)
+spec:
+  template:
+    spec:
+      instanceType: #@ i.nodeMachineType
+      iamInstanceProfile: "nodes.tkg.cloud.vmware.com"
+      sshKeyName: #@ data.values.AWS_SSH_KEY_NAME
+      ami:
+        id: #@ data.values.AWS_AMI_ID
+      rootVolume:
+        size: #@ int(data.values.AWS_NODE_OS_DISK_SIZE_GIB) or 80
+---
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+kind: KubeadmConfigTemplate
+metadata:
+  name: #@ "{}-{}".format(data.values.CLUSTER_NAME,i.name)
+spec:
+  template:
+    spec:
+      joinConfiguration:
+        nodeRegistration:
+          name: '{{ ds.meta_data.local_hostname }}'
+          kubeletExtraArgs:
+            cloud-provider: aws
+
+#@ end            
+
+#@ end
