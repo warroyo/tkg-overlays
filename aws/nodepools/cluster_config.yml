@@ -1,0 +1,17 @@
+#Add this to the cluster config 
+EXTRA_NODE_POOLS: true
+extrapools: |
+  - name: tkg-aws-wc-np-1
+    replicas: 2
+    az: us-west-2b
+    nodeMachineType: t3.large
+    labels:
+      key1: hello
+      key2: value2
+  - name: tkg-aws-wc-np-2
+    replicas: 2
+    az: us-west-2a
+    nodeMachineType: t3.large
+    labels:
+      second: test
+      key2: value2
