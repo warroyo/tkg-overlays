@@ -16,11 +16,21 @@
 #@ if data.values.EXTRA_NODE_POOLS:
 
 #@ for i in data.values.extrapools:
+
+#@ autoscaler_min_size = getattr(i, "autoscaler_min_size",  i.replicas)
+#@ autoscaler_max_size = getattr(i, "autoscaler_max_size",  i.replicas)
+
+
 ---
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: MachineDeployment
 metadata:
   name: #@  "{}-{}".format(data.values.CLUSTER_NAME,i.name)
+  annotations:
+  #@ if data.values.ENABLE_AUTOSCALER:
+    cluster.k8s.io/cluster-api-autoscaler-node-group-min-size: #@ "{}".format(autoscaler_min_size)
+    cluster.k8s.io/cluster-api-autoscaler-node-group-max-size: #@ "{}".format(autoscaler_max_size)
+  #@ end
 spec:
   clusterName: #@ data.values.CLUSTER_NAME
   replicas: #@ i.replicas
