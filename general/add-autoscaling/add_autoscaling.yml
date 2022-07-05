@@ -1,0 +1,22 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+
+
+#@ if  data.values.ENABLE_AUTOSCALER and data.values.ADD_AUTOSCALE != False:
+
+
+#! this could probably be done with some string matching but this is more precise
+#@ not_as_deploy = overlay.not_op(overlay.subset({"kind": "Deployment","metadata":{"name": "{}-{}".format(data.values.CLUSTER_NAME,"cluster-autoscaler")}}))
+#@ not_as_wrk_crb = overlay.not_op(overlay.subset({"kind": "ClusterRoleBinding","metadata": {"name": "{}-{}".format(data.values.CLUSTER_NAME,"autoscaler-workload")}}))
+#@ not_as_mgmt_crb = overlay.not_op(overlay.subset({"kind": "ClusterRoleBinding","metadata": {"name": "{}-{}".format(data.values.CLUSTER_NAME,"autoscaler-management")}}))
+#@ not_as_sa = overlay.not_op(overlay.subset({"kind": "ServiceAccount","metadata": {"name": "{}-{}".format(data.values.CLUSTER_NAME,"autoscaler")}}))
+#@ not_as_mgmt_cr = overlay.not_op(overlay.subset({"kind": "ClusterRole","metadata": {"name": "cluster-autoscaler-management"}}))
+#@ not_as_wrk_cr = overlay.not_op(overlay.subset({"kind": "ClusterRole","metadata": {"name": "cluster-autoscaler-workload"}}))
+#@ not_md = overlay.not_op(overlay.subset({"kind": "MachineDeployment"}))
+
+
+#@overlay/match by=overlay.and_op(not_as_deploy,not_as_wrk_crb,not_as_mgmt_crb,not_as_sa,not_as_mgmt_cr,not_as_wrk_cr,not_md),expects="1+"
+#@overlay/remove
+---
+#@ end
+
