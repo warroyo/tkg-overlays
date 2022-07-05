@@ -34,3 +34,6 @@ AUTOSCALER_MAX_SIZE_2: 10
 ```bash 
 ADD_AUTOSCALE=true tanzu cluster create my-existing-cluster -f  my-cluster-config.yml --dry-run | kubectl apply -f-
 ```
+
+
+at this point you should see some kubectl output showing that the objects were created.
