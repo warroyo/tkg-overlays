@@ -1,14 +1,18 @@
 #@ load("@ytt:overlay", "overlay")
 #@ load("@ytt:data", "data")
 
+#@ md0 = overlay.subset({"kind": "AWSMachineTemplate","metadata":{"name": "{}-{}".format(data.values.CLUSTER_NAME,"md-0")}})
+#@ md1 = overlay.subset({"kind": "AWSMachineTemplate","metadata":{"name": "{}-{}".format(data.values.CLUSTER_NAME,"md-1")}})
+#@ md2 = overlay.subset({"kind": "AWSMachineTemplate","metadata":{"name": "{}-{}".format(data.values.CLUSTER_NAME,"md-2")}})
+
 #@overlay/match by=overlay.subset({"kind":"AWSCluster"})
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: AWSCluster
 spec:
 #@overlay/match missing_ok=True
-#@ if data.values.TAGS != "":
-  #@ tags = data.values.TAGS.split(",")
+#@ if data.values.CLUSTER_TAGS != "":
+  #@ tags = data.values.CLUSTER_TAGS.split(",")
   #@overlay/match missing_ok=True
   #@yaml/text-templated-strings
   additionalTags:
@@ -18,7 +22,8 @@ spec:
   #@ end
 #@ end
 
-#@overlay/match by=overlay.subset({"kind":"AWSMachineTemplate"}),expects="1+"
+
+#@overlay/match by=overlay.or_op(md0,md1,md2),expects="1+"
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: AWSMachineTemplate
@@ -26,8 +31,8 @@ spec:
   template:
     spec:
     #@overlay/match missing_ok=True
-    #@ if data.values.TAGS != "":
-      #@ tags = data.values.TAGS.split(",")
+    #@ if data.values.NODE_TAGS != "":
+      #@ tags = data.values.NODE_TAGS.split(",")
       #@overlay/match missing_ok=True
       #@yaml/text-templated-strings
       additionalTags:

@@ -13,6 +13,7 @@
 #@   return labels
 #@ end
 
+
 #@ if data.values.EXTRA_NODE_POOLS:
 
 #@ for i in data.values.extrapools:
@@ -20,6 +21,10 @@
 #@ autoscaler_min_size = getattr(i, "autoscaler_min_size",  i.replicas)
 #@ autoscaler_max_size = getattr(i, "autoscaler_max_size",  i.replicas)
 
+#@ diskSize =  getattr(i, "diskGiB",  data.values.AWS_NODE_OS_DISK_SIZE_GIB)
+
+#@ tags = getattr(i, "tags",  {})
+#@ taints = getattr(i, "taints",  [])
 
 ---
 apiVersion: cluster.x-k8s.io/v1beta1
@@ -60,13 +65,14 @@ metadata:
 spec:
   template:
     spec:
+      additionalTags: #@ tags
       instanceType: #@ i.nodeMachineType
       iamInstanceProfile: "nodes.tkg.cloud.vmware.com"
       sshKeyName: #@ data.values.AWS_SSH_KEY_NAME
       ami:
         id: #@ data.values.AWS_AMI_ID
       rootVolume:
-        size: #@ int(data.values.AWS_NODE_OS_DISK_SIZE_GIB) or 80
+        size: #@ diskSize or 80
 ---
 apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
 kind: KubeadmConfigTemplate
@@ -75,11 +81,15 @@ metadata:
 spec:
   template:
     spec:
+      initConfiguration:
+        nodeRegistration:
+          taints: #@ taints
       joinConfiguration:
         nodeRegistration:
           name: '{{ ds.meta_data.local_hostname }}'
           kubeletExtraArgs:
             cloud-provider: aws
+          taints: #@ taints
 
 #@ end            
 

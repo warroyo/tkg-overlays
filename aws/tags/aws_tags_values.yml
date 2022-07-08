@@ -2,4 +2,5 @@
 #@overlay/match-child-defaults missing_ok=True
 ---
 
-TAGS: ""
+CLUSTER_TAGS: ""
+NODE_TAGS: ""

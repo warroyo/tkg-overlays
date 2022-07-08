@@ -7,6 +7,8 @@ extrapools: |
     nodeMachineType: t3.large
     autoscaler_min_size: 2
     autoscaler_max_size: 5
+    tags:
+      test: mytest
     labels:
       key1: hello
       key2: value2
@@ -14,6 +16,7 @@ extrapools: |
     replicas: 2
     az: us-west-2a
     nodeMachineType: t3.large
+    diskGiB: 100 #optional
     labels:
       second: test
       key2: value2
