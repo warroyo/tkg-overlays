@@ -10,6 +10,7 @@ extrapools: |
     labels:
       key1: hello
       key2: value2
+    diskGiB: "70"
   - name: tkg-aws-wc-np-2
     replicas: 2
     az: us-west-2a
@@ -17,3 +18,4 @@ extrapools: |
     labels:
       second: test
       key2: value2
+    diskGiB: "50"
