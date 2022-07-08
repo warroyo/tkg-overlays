@@ -66,7 +66,7 @@ spec:
       ami:
         id: #@ data.values.AWS_AMI_ID
       rootVolume:
-        size: #@ int(data.values.AWS_NODE_OS_DISK_SIZE_GIB) or 80
+        size: #@ i.diskGiB
 ---
 apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
 kind: KubeadmConfigTemplate
