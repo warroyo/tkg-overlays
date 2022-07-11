@@ -12,6 +12,10 @@ extrapools: |
     labels:
       key1: hello
       key2: value2
+    taints:
+    - effect: NoSchedule
+      key: testing.vmware.com
+      value: "yes"
   - name: tkg-aws-wc-np-2
     replicas: 2
     az: us-west-2a
