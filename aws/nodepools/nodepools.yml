@@ -16,6 +16,18 @@
 
 #@ if data.values.EXTRA_NODE_POOLS:
 
+#! this will allow for setting an extra var ADD_POOLS in 
+#! order to just generate that nodepool yaml to apply after the fact. this will 
+#! not handle updating immutable field though.
+---
+#@ if  data.values.ADD_POOLS != False:
+#@overlay/match by=overlay.all,expects="1+"
+#@overlay/remove
+---
+#@ end
+
+
+#! loop over the extrapool data
 #@ for i in data.values.extrapools:
 
 #@ autoscaler_min_size = getattr(i, "autoscaler_min_size",  i.replicas)
@@ -26,6 +38,10 @@
 #@ tags = getattr(i, "tags",  {})
 #@ taints = getattr(i, "taints",  [])
 
+
+
+#@overlay/match by=overlay.all,expects=0
+#@overlay/append
 ---
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: MachineDeployment
@@ -57,6 +73,9 @@ spec:
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: AWSMachineTemplate
       failureDomain: #@ i.az
+
+#@overlay/match by=overlay.all,expects=0
+#@overlay/append
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: AWSMachineTemplate
@@ -73,6 +92,9 @@ spec:
         id: #@ data.values.AWS_AMI_ID
       rootVolume:
         size: #@ diskSize or 80
+
+#@overlay/match by=overlay.all,expects=0
+#@overlay/append
 ---
 apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
 kind: KubeadmConfigTemplate
