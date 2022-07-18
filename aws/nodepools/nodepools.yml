@@ -111,6 +111,7 @@ spec:
           name: '{{ ds.meta_data.local_hostname }}'
           kubeletExtraArgs:
             cloud-provider: aws
+            node-labels:  #@ ",".join([k+"="+i.labels[k] for k in i.labels])
           taints: #@ taints
 
 #@ end            
