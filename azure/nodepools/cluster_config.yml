@@ -1,0 +1,24 @@
+#Add this to the cluster config 
+EXTRA_NODE_POOLS: true
+extrapools: |
+  - name: tkg-az-wc-np-1
+    replicas: 2
+    az: 1
+    nodeMachineType: Standard_D2s_v3
+    autoscaler_min_size: 2
+    autoscaler_max_size: 5
+    labels:
+      key1: hello
+      key2: value2
+    taints:
+    - effect: NoSchedule
+      key: testing.vmware.com
+      value: "yes"
+  - name: tkg-az-wc-np-2
+    replicas: 2
+    az: 2
+    nodeMachineType: Standard_D2s_v3
+    diskGiB: 100
+    labels:
+      second: test
+      key2: value2

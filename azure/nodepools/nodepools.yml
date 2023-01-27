@@ -1,0 +1,128 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+#@ load("@ytt:yaml", "yaml")
+
+
+#@ def merge_labels(pool):
+#@   predefined_labels = {"node-pool": "{}-{}".format(data.values.CLUSTER_NAME,pool.name)}
+#@   labels = {}
+#@   if hasattr(pool, "labels"):
+#@     labels.update(pool.labels)
+#@   end
+#@   labels.update(predefined_labels)
+#@   return labels
+#@ end
+
+
+#@ if data.values.EXTRA_NODE_POOLS:
+
+#! this will allow for setting an extra var ADD_POOLS in 
+#! order to just generate that nodepool yaml to apply after the fact. this will 
+#! not handle updating immutable field though.
+---
+#@ if  data.values.ADD_POOLS != False:
+#@overlay/match by=overlay.all,expects="1+"
+#@overlay/remove
+---
+#@ end
+
+
+#! loop over the extrapool data
+#@ for i in data.values.extrapools:
+
+#@ autoscaler_min_size = getattr(i, "autoscaler_min_size",  i.replicas)
+#@ autoscaler_max_size = getattr(i, "autoscaler_max_size",  i.replicas)
+
+#@ diskSize =  getattr(i, "diskGiB",  data.values.AZURE_NODE_OS_DISK_SIZE_GIB)
+
+#@ tags = getattr(i, "tags",  {})
+#@ taints = getattr(i, "taints",  [])
+
+
+
+#@overlay/match by=overlay.all,expects=0
+#@overlay/append
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachineDeployment
+metadata:
+  name: #@  "{}-{}".format(data.values.CLUSTER_NAME,i.name)
+  annotations:
+  #@ if data.values.ENABLE_AUTOSCALER:
+    cluster.k8s.io/cluster-api-autoscaler-node-group-min-size: #@ "{}".format(autoscaler_min_size)
+    cluster.k8s.io/cluster-api-autoscaler-node-group-max-size: #@ "{}".format(autoscaler_max_size)
+  #@ end
+spec:
+  clusterName: #@ data.values.CLUSTER_NAME
+  replicas: #@ i.replicas
+  selector:
+    matchLabels: null
+  template:
+    metadata:
+      labels: #@ merge_labels(i)
+    spec:
+      clusterName: #@ data.values.CLUSTER_NAME
+      version: #@ data.values.KUBERNETES_VERSION
+      bootstrap:
+        configRef:
+          name: #@ "{}-{}".format(data.values.CLUSTER_NAME,i.name)
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+          kind: KubeadmConfigTemplate
+      infrastructureRef:
+        name: #@ "{}-{}".format(data.values.CLUSTER_NAME,i.name)
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: AzureMachineTemplate
+      failureDomain: #@ i.az
+
+#@overlay/match by=overlay.all,expects=0
+#@overlay/append
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: AzureMachineTemplate
+metadata:
+  name: #@ "{}-{}".format(data.values.CLUSTER_NAME,i.name)
+spec:
+  template:
+    spec:
+      #@ if data.values.AZURE_ENABLE_NODE_DATA_DISK == True:
+      #@overlay/match missing_ok=True
+      dataDisks:
+      - diskSizeGB: #@ data.values.AZURE_NODE_DATA_DISK_SIZE_GIB
+        lun: 0
+        nameSuffix: nodedisk
+      #@ end
+      #@overlay/match missing_ok=True
+      image: #@ get_azure_image(bomDataForK8sVersion)
+      sshPublicKey: #@ data.values.AZURE_SSH_PUBLIC_KEY_B64
+      vmSize: #@ i.nodeMachineType
+      osDisk:
+        diskSizeGB: #@ diskSize or 80
+        managedDisk:
+          storageAccountType: #@ data.values.AZURE_NODE_OS_DISK_STORAGE_ACCOUNT_TYPE
+        osType: Linux
+
+
+#@overlay/match by=overlay.all,expects=0
+#@overlay/append
+---
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+kind: KubeadmConfigTemplate
+metadata:
+  name: #@ "{}-{}".format(data.values.CLUSTER_NAME,i.name)
+spec:
+  template:
+    spec:
+      initConfiguration:
+        nodeRegistration:
+          taints: #@ taints
+      joinConfiguration:
+        nodeRegistration:
+          name: '{{ ds.meta_data["local_hostname"] }}'
+          kubeletExtraArgs:
+            cloud-provider: azure
+            node-labels:  #@ ",".join([k+"="+i.labels[k] for k in i.labels])
+          taints: #@ taints
+
+#@ end            
+
+#@ end
