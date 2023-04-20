@@ -123,7 +123,7 @@ spec:
         devices:
           #@overlay/match by=overlay.index(0)
           #@overlay/replace
-          - networkName: #@ data.values.VSPHERE_NETWORK
+          - networkName: #@ network
             #@ if data.values.WORKER_NODE_NAMESERVERS:
             nameservers: #@ data.values.WORKER_NODE_NAMESERVERS.replace(" ", "").split(",")
             #@ end
@@ -137,7 +137,7 @@ spec:
             #@ end
       numCPUs: #@ numCPUs
 #@ if customVMX != "" and customVMX != None:
-      customVMXKeys: #@ get_custom_keys(data.values.VSPHERE_WORKER_CUSTOM_VMX_KEYS)
+      customVMXKeys: #@ get_custom_keys(customVMX)
 #@ end
       resourcePool: #@ resourcePool
       server: #@ vcIP
