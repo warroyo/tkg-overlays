@@ -1,0 +1,175 @@
+#@ load("@ytt:overlay", "overlay")
+#@ load("@ytt:data", "data")
+#@ load("@ytt:yaml", "yaml")
+
+
+#@ def merge_labels(pool):
+#@   predefined_labels = {"node-pool": "{}-{}".format(data.values.CLUSTER_NAME,pool.name)}
+#@   labels = {}
+#@   if hasattr(pool, "labels"):
+#@     labels.update(pool.labels)
+#@   end
+#@   labels.update(predefined_labels)
+#@   return labels
+#@ end
+
+
+#@ if data.values.EXTRA_NODE_POOLS:
+
+#! this will allow for setting an extra var ADD_POOLS in 
+#! order to just generate that nodepool yaml to apply after the fact. this will 
+#! not handle updating immutable field though.
+---
+#@ if  data.values.ADD_POOLS != False:
+#@overlay/match by=overlay.all,expects="1+"
+#@overlay/remove
+---
+#@ end
+
+
+#! loop over the extrapool data
+#@ for i in data.values.extrapools:
+
+#@ autoscaler_min_size = getattr(i, "autoscaler_min_size",  i.replicas)
+#@ autoscaler_max_size = getattr(i, "autoscaler_max_size",  i.replicas)
+
+#@ cloneMode =  getattr(i, "cloneMode",  data.values.VSPHERE_CLONE_MODE)
+#@ datacenter =  getattr(i, "datacenter",  data.values.VSPHERE_DATACENTER)
+#@ datastore =  getattr(i, "datastore",  data.values.VSPHERE_DATASTORE)
+#@ storagePolicyName =  getattr(i, "storagePolicyName",  data.values.VSPHERE_STORAGE_POLICY_ID)
+#@ diskGiB =  getattr(i, "diskGiB",  data.values.VSPHERE_WORKER_DISK_GIB)
+#@ folder =  getattr(i, "folder",  data.values.VSPHERE_FOLDER)
+#@ memoryMiB =  getattr(i, "memoryMiB",  data.values.VSPHERE_WORKER_MEM_MIB)
+#@ network =  getattr(i, "network",  data.values.VSPHERE_NETWORK)
+#@ numCPUs =  getattr(i, "numCPUs",  data.values.VSPHERE_WORKER_NUM_CPUS)
+#@ resourcePool =  getattr(i, "resourcePool",  data.values.VSPHERE_RESOURCE_POOL)
+#@ template =  getattr(i, "template",  data.values.VSPHERE_TEMPLATE)
+#@ vcIP =  getattr(i, "vcIP",  data.values.VSPHERE_SERVER)
+#@ customVMX =  getattr(i, "customVMX",  data.values.VSPHERE_WORKER_CUSTOM_VMX_KEYS)
+
+
+
+#@ tags = getattr(i, "tags",  {})
+#@ taints = getattr(i, "taints",  [])
+
+
+
+#@overlay/match by=overlay.all,expects=0
+#@overlay/append
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachineDeployment
+metadata:
+  name: #@  "{}-{}".format(data.values.CLUSTER_NAME,i.name)
+  annotations:
+  #@ if data.values.ENABLE_AUTOSCALER:
+    cluster.k8s.io/cluster-api-autoscaler-node-group-min-size: #@ "{}".format(autoscaler_min_size)
+    cluster.k8s.io/cluster-api-autoscaler-node-group-max-size: #@ "{}".format(autoscaler_max_size)
+  #@ end
+spec:
+  clusterName: #@ data.values.CLUSTER_NAME
+  replicas: #@ i.replicas
+  selector:
+    matchLabels: null
+  template:
+    metadata:
+      labels: #@ merge_labels(i)
+    spec:
+      clusterName: #@ data.values.CLUSTER_NAME
+      version: #@ data.values.KUBERNETES_VERSION
+      bootstrap:
+        configRef:
+          name: #@ "{}-{}".format(data.values.CLUSTER_NAME,i.name)
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+          kind: KubeadmConfigTemplate
+      infrastructureRef:
+        name: #@ "{}-{}".format(data.values.CLUSTER_NAME,i.name)
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: VSphereMachineTemplate
+
+
+#@overlay/match by=overlay.all,expects=0
+#@overlay/append
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: VSphereMachineTemplate
+metadata:
+  name: #@ "{}-{}".format(data.values.CLUSTER_NAME,i.name)
+  #@overlay/match missing_ok=True
+  annotations:
+    vmTemplateMoid: #@ data.values.VSPHERE_TEMPLATE_MOID
+spec:
+  template:
+    spec:
+      cloneMode:  #@ cloneMode
+      datacenter: #@ datacenter
+      datastore: #@ datastore
+      storagePolicyName: #@ storagePolicyName
+      diskGiB: #@ diskGiB
+      folder: #@ folder
+      memoryMiB: #@ memoryMiB
+      network:
+        devices:
+          #@overlay/match by=overlay.index(0)
+          #@overlay/replace
+          - networkName: #@ data.values.VSPHERE_NETWORK
+            #@ if data.values.WORKER_NODE_NAMESERVERS:
+            nameservers: #@ data.values.WORKER_NODE_NAMESERVERS.replace(" ", "").split(",")
+            #@ end
+            #@ if data.values.TKG_IP_FAMILY == "ipv6":
+            dhcp6: true
+            #@ elif data.values.TKG_IP_FAMILY in ["ipv4,ipv6", "ipv6,ipv4"]:
+            dhcp4: true
+            dhcp6: true
+            #@ else:
+            dhcp4: true
+            #@ end
+      numCPUs: #@ numCPUs
+#@ if data.values.VSPHERE_WORKER_CUSTOM_VMX_KEYS != "" and data.values.VSPHERE_WORKER_CUSTOM_VMX_KEYS != None:
+      #@overlay/match missing_ok=True
+      customVMXKeys: #@ get_custom_keys(data.values.VSPHERE_WORKER_CUSTOM_VMX_KEYS)
+#@ end
+      resourcePool: #@ resourcePool
+      server: #@ vcIP
+      template: #@ template
+      hardwareVersion: #@ data.values.VSPHERE_WORKER_HARDWARE_VERSION
+
+
+#@overlay/match by=overlay.all,expects=0
+#@overlay/append
+---
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+kind: KubeadmConfigTemplate
+metadata:
+  name: #@ "{}-{}".format(data.values.CLUSTER_NAME,i.name)
+  namespace: '${ NAMESPACE }'
+spec:
+  template:
+    spec:
+      useExperimentalRetryJoin: true
+      joinConfiguration:
+        nodeRegistration:
+          taints: #@ taints
+          criSocket: /var/run/containerd/containerd.sock
+          kubeletExtraArgs:
+            cloud-provider: external
+            node-labels:  #@ ",".join([k+"="+i.labels[k] for k in i.labels])
+            tls-cipher-suites: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+          name: '{{ ds.meta_data.hostname }}'
+          taints: #@ taints
+      preKubeadmCommands:
+        - hostname "{{ ds.meta_data.hostname }}"
+        - echo "::1         ipv6-localhost ipv6-loopback" >/etc/hosts
+        - echo "127.0.0.1   localhost" >>/etc/hosts
+        - echo "127.0.0.1   {{ ds.meta_data.hostname }}" >>/etc/hosts
+        - echo "{{ ds.meta_data.hostname }}" >/etc/hostname
+      files: []
+      users:
+        - name: capv
+          sshAuthorizedKeys:
+            - #@ data.values.VSPHERE_SSH_AUTHORIZED_KEY
+          sudo: ALL=(ALL) NOPASSWD:ALL
+
+#@ end            
+
+#@ end

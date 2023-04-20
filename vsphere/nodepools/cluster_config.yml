@@ -1,0 +1,44 @@
+#Add this to the cluster config 
+EXTRA_NODE_POOLS: true
+extrapools: |
+  - name: tkg-az-wc-np-1
+    replicas: 2
+    memoryMiB: 8192
+    diskGiB: 64
+    numCPUs: 4
+    datacenter: dc0
+    datastore: iscsi-ds-0
+    storagePolicyName: name
+    folder: vmFolder
+    resourcePool: rp-1
+    vcIP: 10.0.0.1
+    template: templateName
+    customVMX: "pciPassthru.allowP2P=true,pciPassthru.RelaxACSforP2P=true"
+    cloneMode: clone-mode
+    network: network-name
+    autoscaler_min_size: 2
+    autoscaler_max_size: 5
+    labels:
+      key1: hello
+      key2: value2
+    taints:
+    - effect: NoSchedule
+      key: testing.vmware.com
+      value: "yes"
+  - name: tkg-az-wc-np-2
+    replicas: 2
+    memoryMiB: 8192
+    diskGiB: 64
+    numCPUs: 4
+    datacenter: dc0
+    datastore: iscsi-ds-0
+    storagePolicyName: name
+    folder: vmFolder
+    resourcePool: rp-1
+    vcIP: 10.0.0.1
+    template: templateName
+    cloneMode: clone-mode
+    network: network-name
+    labels:
+      second: test
+      key2: value2
