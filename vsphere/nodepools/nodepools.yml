@@ -13,6 +13,17 @@
 #@   return labels
 #@ end
 
+#@ def get_custom_keys(keyValueString):
+#@   customKeys = dict()
+#@   for val in keyValueString.split(','):
+#@     kv = val.split('=')
+#@     if len(kv) != 2:
+#@       assert.fail("Given input is not in correct format")
+#@     end
+#@     customKeys[kv[0]] = kv[1]
+#@ end
+#@  return customKeys
+#@ end
 
 #@ if data.values.EXTRA_NODE_POOLS:
 
@@ -125,8 +136,7 @@ spec:
             dhcp4: true
             #@ end
       numCPUs: #@ numCPUs
-#@ if data.values.VSPHERE_WORKER_CUSTOM_VMX_KEYS != "" and data.values.VSPHERE_WORKER_CUSTOM_VMX_KEYS != None:
-      #@overlay/match missing_ok=True
+#@ if customVMX != "" and customVMX != None:
       customVMXKeys: #@ get_custom_keys(data.values.VSPHERE_WORKER_CUSTOM_VMX_KEYS)
 #@ end
       resourcePool: #@ resourcePool
