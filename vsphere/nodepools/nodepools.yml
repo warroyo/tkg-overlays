@@ -1,7 +1,7 @@
 #@ load("@ytt:overlay", "overlay")
 #@ load("@ytt:data", "data")
 #@ load("@ytt:yaml", "yaml")
-
+#@ load("@ytt:assert", "assert")
 
 #@ def merge_labels(pool):
 #@   predefined_labels = {"node-pool": "{}-{}".format(data.values.CLUSTER_NAME,pool.name)}
@@ -27,8 +27,8 @@
 
 #@ if data.values.EXTRA_NODE_POOLS:
 
-#! this will allow for setting an extra var ADD_POOLS in 
-#! order to just generate that nodepool yaml to apply after the fact. this will 
+#! this will allow for setting an extra var ADD_POOLS in
+#! order to just generate that nodepool yaml to apply after the fact. this will
 #! not handle updating immutable field though.
 ---
 #@ if  data.values.ADD_POOLS != False:
@@ -142,7 +142,6 @@ spec:
       resourcePool: #@ resourcePool
       server: #@ vcIP
       template: #@ template
-      hardwareVersion: #@ data.values.VSPHERE_WORKER_HARDWARE_VERSION
 
 
 #@overlay/match by=overlay.all,expects=0
@@ -166,7 +165,6 @@ spec:
             node-labels:  #@ ",".join([k+"="+i.labels[k] for k in i.labels])
             tls-cipher-suites: TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
           name: '{{ ds.meta_data.hostname }}'
-          taints: #@ taints
       preKubeadmCommands:
         - hostname "{{ ds.meta_data.hostname }}"
         - echo "::1         ipv6-localhost ipv6-loopback" >/etc/hosts
@@ -180,6 +178,6 @@ spec:
             - #@ data.values.VSPHERE_SSH_AUTHORIZED_KEY
           sudo: ALL=(ALL) NOPASSWD:ALL
 
-#@ end            
+#@ end
 
 #@ end
