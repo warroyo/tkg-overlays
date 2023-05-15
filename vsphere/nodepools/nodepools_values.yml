@@ -3,3 +3,4 @@
 ---
 EXTRA_NODE_POOLS: true
 extrapools: []
+ADD_POOLS: false
